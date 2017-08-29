@@ -1,0 +1,40 @@
+# Created by Aleix Peña for Gmedia
+version: '2'
+services:
+    php:
+        build: php5-apache
+        restart: always
+        ports:
+            - "80:80"
+            - "443:443"
+        volumes:
+            #- "./etc/php/php.ini:/usr/local/etc/php/conf.d/php.ini"
+            - "./etc/apache/${DOMAIN_NAME}.conf:/CONF/apache/${DOMAIN_NAME}.conf"
+            - ./web:/CODE/${DOMAIN_NAME}/live
+            - "./etc/ssl:/etc/ssl"
+        depends_on:
+            - "mysqldb"
+    myadmin:
+        image: phpmyadmin/phpmyadmin
+        container_name: phpmyadmin
+        ports:
+            - "8080:80"
+        environment:
+            - PMA_ARBITRARY=1
+            - PMA_HOST=mysql
+        restart: always
+        depends_on:
+            - "mysqldb"
+    mysqldb:
+        image: mysql
+        container_name: mysql
+        restart: always
+        environment:
+            - MYSQL_DATABASE=${DATABASE}
+            - MYSQL_ROOT_PASSWORD=root
+            - MYSQL_USER=${DATABASE_USER}
+            - MYSQL_PASSWORD=${DATABASE_PASS}
+        ports:
+            - 3306:3306
+        volumes:
+            - ./data/db/mysql:/var/lib/mysql
